@@ -2,19 +2,28 @@ import ExchangeForm from './components/ExchangeForm';
 import LookupForm from './components/LookupForm';
 import {getActiveBanks,getActiveProducts,getServiceSettings} from '../lib/db';
 
+const productImages={
+  cultureland:'https://raw.githubusercontent.com/graffityart/seoyo/main/public/images/products/%EC%BB%AC%EC%B3%90%EB%9E%9C%EB%93%9C%20%EB%AC%B8%ED%99%94%EC%83%81%ED%92%88%EA%B6%8C.svg',
+  'online-culture':'https://raw.githubusercontent.com/graffityart/seoyo/main/public/images/products/%EC%98%A8%EB%9D%BC%EC%9D%B8%EB%AC%B8%ED%99%94%EC%83%81%ED%92%88%EA%B6%8C.jpg',
+  teencash:'https://raw.githubusercontent.com/graffityart/seoyo/main/public/images/products/%ED%8B%B4%EC%BA%90%EC%8B%9C.png',
+  'booknlife-book':'https://raw.githubusercontent.com/graffityart/seoyo/main/public/images/products/%EB%B6%81%EC%95%A4%EB%9D%BC%EC%9D%B4%ED%94%84%20%EB%8F%84%EC%84%9C%EB%AC%B8%ED%99%94%EC%83%81%ED%92%88%EA%B6%8C.svg',
+  'lotte-mobile':'https://raw.githubusercontent.com/graffityart/seoyo/main/public/images/products/%EB%A1%AF%EB%8D%B0%EB%AA%A8%EB%B0%94%EC%9D%BC%EC%83%81%ED%92%88%EA%B6%8C.png',
+  'google-gift':'https://raw.githubusercontent.com/graffityart/seoyo/main/public/images/products/%EA%B5%AC%EA%B8%80%EA%B8%B8%ED%94%84%ED%8A%B8%20%EC%B9%B4%EB%93%9C.svg'
+};
 const steps=[['01','상품권 선택','보유한 상품권과 현재 매입률을 확인합니다.'],['02','신청정보 입력','PIN 번호와 계좌정보를 정확하게 입력합니다.'],['03','상품권 검수','접수된 상품권의 사용 가능 여부를 확인합니다.'],['04','처리 완료','검수가 끝나면 처리 결과와 입금 상태를 안내합니다.']];
 const notices=['신청 전 상품권 번호와 계좌·연락처 정보를 정확하게 확인해 주세요.','잘못 입력한 정보로 인해 처리 지연이 발생할 수 있으니 신청 전 다시 한번 확인해 주세요.','비정상적인 상품권 등록이나 허위 정보가 확인되면 안전한 거래를 위해 접수가 제한될 수 있습니다.','도난·사기 등 불법적인 경로로 취득한 상품권은 거래가 제한됩니다.'];
 
 export const dynamic='force-dynamic';
 export default async function Home(){
   const [products,banks,settings]=await Promise.all([getActiveProducts(),getActiveBanks(),getServiceSettings()]);
+  const safeProducts=products.map(p=>({...p,imageUrl:productImages[p.slug]||''}));
   const fmt=new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',year:'2-digit',month:'2-digit',day:'2-digit',weekday:'short'}).format(new Date());
   return <div className="hanbit" id="top">
     <header className="topbar"><div className="shell headerIn"><a className="logo" href="#top"><span className="logoSymbol">H</span><span className="logoText">한빛 상품권</span></a><nav><a href="#rates">상품권매입시세</a><a href="#apply">상품권현금교환</a><a href="#guide">이용방법</a><a href="#faq">자주묻는질문</a><a href="#customer">고객센터</a></nav><a className="lookupBtn" href="#lookup">내주문조회</a></div></header>
     <main>
-      <section className="heroBanner"><div className="heroInner shell"><div><span>365일 24시간 상품권 매입</span><h1>빠르고 간편한<br/><em>한빛 상품권 현금교환</em></h1><p>회원가입 없이 상품권 정보를 입력하면 간편하게 접수할 수 있습니다.</p><a href="#apply">상품권 교환 신청하기</a></div><div className="heroCard"><small>오늘의 대표 매입률</small><strong>{Number(products[0]?.default_rate||0).toFixed(0)}%</strong><p>{products[0]?.name||'상품권'} 기준</p></div></div></section>
-      <section id="rates" className="rateSection"><div className="shell"><div className="todayTitle"><span>TODAY</span><b>{fmt}</b><strong>실시간 매입시세</strong></div><div className="rateGridKsdl">{products.map(p=><article key={p.id}><b>{p.name}</b><div className="rateLogo"><span>{p.name.slice(0,1)}</span></div><strong>{Number(p.default_rate).toFixed(0)}%</strong><a href="#apply">신청</a></article>)}</div><div className="dailyNote">상품권별 매입률은 시장 상황에 따라 변동될 수 있으며 접수 시점의 매입률이 적용됩니다.</div></div></section>
-      <section id="apply" className="applySection"><div className="shell"><div className="sectionTitle"><p>상품권 현금교환</p><h2>상품권 정보를 입력하고 바로 신청하세요</h2></div><ExchangeForm products={products} banks={banks} settings={settings}/></div></section>
+      <section className="heroBanner"><a href="#apply" aria-label="한빛 상품권 현금교환 신청하기"><picture><source media="(max-width:760px)" srcSet="/images/hero/mobilehero.svg"/><img src="/images/hero/pchero.svg" alt="한빛 상품권 빠르고 간편한 상품권 현금교환" fetchPriority="high"/></picture></a></section>
+      <section id="rates" className="rateSection"><div className="shell"><div className="todayTitle"><span>TODAY</span><b>{fmt}</b><strong>실시간 매입시세</strong></div><div className="rateGridKsdl">{safeProducts.map(p=><article key={p.id}><b>{p.name}</b><div className="rateLogo">{p.imageUrl?<img src={p.imageUrl} alt={p.name}/>:<span>{p.name.slice(0,1)}</span>}</div><strong>{Number(p.default_rate).toFixed(0)}%</strong><a href="#apply">신청</a></article>)}</div><div className="dailyNote">상품권별 매입률은 시장 상황에 따라 변동될 수 있으며 접수 시점의 매입률이 적용됩니다.</div></div></section>
+      <section id="apply" className="applySection"><div className="shell"><div className="sectionTitle"><p>상품권 현금교환</p><h2>상품권 정보를 입력하고 바로 신청하세요</h2></div><ExchangeForm products={safeProducts} banks={banks} settings={settings}/></div></section>
       <section id="lookup" className="lookupSection"><div className="shell"><div className="sectionTitle"><p>내 주문 조회</p><h2>전화번호로 처리상태를 확인하세요</h2><span>접수 시 입력한 전화번호와 조회 비밀번호로 신청내역을 확인할 수 있습니다.</span></div><LookupForm/></div></section>
       <section id="guide" className="guideSection"><div className="shell"><div className="sectionTitle"><p>이용 절차</p><h2>신청부터 입금까지 4단계</h2></div><div className="stepGridKsdl">{steps.map(([n,t,d])=><article key={n}><span>{n}</span><div className="stepIcon">{n}</div><h3>{t}</h3><p>{d}</p></article>)}</div></div></section>
       <section className="customerNotice"><div className="shell"><div className="noticePanel"><div className="noticeHeading"><span>!</span><div><h2><em>꼭!</em> 알아두세요.</h2><p>안전한 거래를 위해 신청 전에 확인해 주세요.</p></div></div><ol>{notices.map((text,i)=><li key={text}><span>{String(i+1).padStart(2,'0')}.</span><p>{text}</p></li>)}</ol></div></div></section>
