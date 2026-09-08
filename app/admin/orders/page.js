@@ -1,0 +1,13 @@
+import Link from 'next/link';
+import {redirect} from 'next/navigation';
+import {isAdmin} from '../../../lib/admin-auth';
+import {getDb} from '../../../lib/db';
+
+export const dynamic='force-dynamic';
+const labels={received:'접수중',reviewing:'확인중',checking:'확인중',completed:'입금완료',paid:'입금완료',impossible:'처리불가',rejected:'처리불가'};
+export default async function AdminOrders(){
+ if(!(await isAdmin()))redirect('/admin/login');
+ const sql=getDb();
+ const rows=await sql`SELECT o.id,o.order_no,o.customer_name,o.requested_amount,o.expected_amount,o.status,o.created_at,COUNT(oi.id)::int item_count,STRING_AGG(DISTINCT p.name, ', ' ORDER BY p.name) product_names FROM orders o LEFT JOIN order_items oi ON oi.order_id=o.id LEFT JOIN products p ON p.id=oi.product_id WHERE o.deleted_at IS NULL GROUP BY o.id ORDER BY o.created_at DESC LIMIT 100`;
+ return <div className="adminPage"><div className="adminTop"><b>HANBIT ADMINISTRATOR</b><Link href="/">사이트 보기</Link></div><div className="adminWrap"><aside className="adminSide"><h3>상품권 운영 관리</h3><Link className="active" href="/admin/orders">교환신청 관리</Link><Link href="/admin/rates">상품권 매입률 관리</Link><Link href="/admin/notices">공지사항 관리</Link></aside><main className="adminMain"><div className="adminTitle"><small>ORDER MANAGEMENT</small><h1>교환신청 관리</h1><p>최근 접수된 상품권 교환 신청을 확인합니다.</p></div><div className="adminTableWrap"><table className="adminTable"><thead><tr><th>접수번호</th><th>신청자</th><th>상품권</th><th>건수</th><th>접수금액</th><th>예상입금</th><th>상태</th><th>접수일</th></tr></thead><tbody>{rows.length?rows.map(o=><tr key={o.id}><td><b>{o.order_no}</b></td><td>{o.customer_name}</td><td>{o.product_names||'-'}</td><td>{o.item_count}</td><td>{Number(o.requested_amount).toLocaleString()}원</td><td>{Number(o.expected_amount).toLocaleString()}원</td><td><span className={`adminStatus status-${o.status}`}>{labels[o.status]||o.status}</span></td><td>{new Date(o.created_at).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'})}</td></tr>):<tr><td colSpan="8" className="adminEmpty">접수된 주문이 없습니다.</td></tr>}</tbody></table></div></main></div></div>;
+}
