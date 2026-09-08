@@ -1,4 +1,5 @@
 import './globals.css';
+import './exchange-form.css';
 
 export const metadata = {
   title: '한빛 상품권',
