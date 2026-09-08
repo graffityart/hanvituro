@@ -23,7 +23,7 @@ export default function ExchangeForm({products,banks,settings}){
   return <div className="applyCard">
     <h3>상품권 현금교환</h3>
     <div className="productSelectHead"><div className="productSelectIcon">▱</div><div><strong>상품권 <em>선택</em></strong><span>현금교환할 상품권을 선택해주세요.</span></div></div>
-    <div className="productStrip">{products.map(p=><button type="button" key={p.id} aria-pressed={String(p.id)===productId} onClick={()=>setProductId(String(p.id))}><span className="productDummy">{p.name.slice(0,1)}</span><span>{p.name}</span>{String(p.id)===productId&&<b className="selectedRateBadge">{Number(p.default_rate).toFixed(0)}%</b>}</button>)}</div>
+    <div className="productStrip">{products.map(p=><button type="button" key={p.id} aria-pressed={String(p.id)===productId} onClick={()=>setProductId(String(p.id))}>{p.imageUrl?<img className="productLogo" src={p.imageUrl} alt={p.name}/>:<span className="productDummy">{p.name.slice(0,1)}</span>}<span>{p.name}</span>{String(p.id)===productId&&<b className="selectedRateBadge">{Number(p.default_rate).toFixed(0)}%</b>}</button>)}</div>
     {product&&<div className="productHelp"><div className="productHelpIcon">%</div><div><strong>{product.name}</strong><span>현재 매입률 <b>{Number(product.default_rate).toFixed(0)}%</b></span></div></div>}
     <label>핀번호</label>
     <div className="pinAmountRow"><input value={pin} onChange={e=>setPin(e.target.value.toUpperCase())} placeholder="상품권 PIN 번호 입력" autoComplete="off"/><button type="button" onClick={addItem}>상품권 추가</button></div>
