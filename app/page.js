@@ -1,6 +1,8 @@
 import ExchangeForm from './components/ExchangeForm';
 import LookupForm from './components/LookupForm';
-import {getActiveBanks,getActiveProducts,getServiceSettings} from '../lib/db';
+import HomeStatusBoard from './components/HomeStatusBoard';
+import MobileMenu from './components/MobileMenu';
+import {getActiveBanks,getActiveProducts,getServiceSettings,getLiveOrders} from '../lib/db';
 
 const productImages={
   cultureland:'https://raw.githubusercontent.com/graffityart/seoyo/main/public/images/products/%EC%BB%AC%EC%B3%90%EB%9E%9C%EB%93%9C%20%EB%AC%B8%ED%99%94%EC%83%81%ED%92%88%EA%B6%8C.svg',
@@ -15,16 +17,17 @@ const notices=['신청 전 상품권 번호와 계좌·연락처 정보를 정�
 
 export const dynamic='force-dynamic';
 export default async function Home(){
-  const [products,banks,settings]=await Promise.all([getActiveProducts(),getActiveBanks(),getServiceSettings()]);
+  const [products,banks,settings,liveOrders]=await Promise.all([getActiveProducts(),getActiveBanks(),getServiceSettings(),getLiveOrders(8)]);
   const safeProducts=products.map(p=>({...p,imageUrl:productImages[p.slug]||''}));
   const fmt=new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',year:'2-digit',month:'2-digit',day:'2-digit',weekday:'short'}).format(new Date());
   return <div className="hanbit" id="top">
-    <header className="topbar"><div className="shell headerIn"><a className="logo" href="#top"><span className="logoSymbol">H</span><span className="logoText">한빛 상품권</span></a><nav><a href="#rates">상품권매입시세</a><a href="#apply">상품권현금교환</a><a href="#guide">이용방법</a><a href="#faq">자주묻는질문</a><a href="#customer">고객센터</a></nav><a className="lookupBtn" href="#lookup">내주문조회</a></div></header>
+    <header className="topbar"><div className="shell headerIn"><a className="logo" href="#top"><span className="logoSymbol">H</span><span className="logoText">한빛 상품권</span></a><nav><a href="#rates">상품권매입시세</a><a href="#live">실시간매입현황</a><a href="#apply">상품권현금교환</a><a href="#guide">이용방법</a><a href="#faq">자주묻는질문</a><a href="#customer">고객센터</a></nav><a className="lookupBtn" href="#lookup">내주문조회</a><MobileMenu/></div></header>
     <main>
       <section className="heroBanner"><a href="#apply" aria-label="한빛 상품권 현금교환 신청하기"><picture><source media="(max-width:760px)" srcSet="/images/hero/mobilehero.svg"/><img src="/images/hero/pchero.svg" alt="한빛 상품권 빠르고 간편한 상품권 현금교환" fetchPriority="high"/></picture></a></section>
       <section id="rates" className="rateSection"><div className="shell"><div className="todayTitle"><span>TODAY</span><b>{fmt}</b><strong>실시간 매입시세</strong></div><div className="rateGridKsdl">{safeProducts.map(p=><article key={p.id}><b>{p.name}</b><div className="rateLogo">{p.imageUrl?<img src={p.imageUrl} alt={p.name}/>:<span>{p.name.slice(0,1)}</span>}</div><strong>{Number(p.default_rate).toFixed(0)}%</strong><a href="#apply">신청</a></article>)}</div><div className="dailyNote">상품권별 매입률은 시장 상황에 따라 변동될 수 있으며 접수 시점의 매입률이 적용됩니다.</div></div></section>
       <section id="apply" className="applySection"><div className="shell"><div className="sectionTitle"><p>상품권 현금교환</p><h2>상품권 정보를 입력하고 바로 신청하세요</h2></div><ExchangeForm products={safeProducts} banks={banks} settings={settings}/></div></section>
       <section id="lookup" className="lookupSection"><div className="shell"><div className="sectionTitle"><p>내 주문 조회</p><h2>전화번호로 처리상태를 확인하세요</h2><span>접수 시 입력한 전화번호와 조회 비밀번호로 신청내역을 확인할 수 있습니다.</span></div><LookupForm/></div></section>
+      <HomeStatusBoard orders={liveOrders}/>
       <section id="guide" className="guideSection"><div className="shell"><div className="sectionTitle"><p>이용 절차</p><h2>신청부터 입금까지 4단계</h2></div><div className="stepGridKsdl">{steps.map(([n,t,d])=><article key={n}><span>{n}</span><div className="stepIcon">{n}</div><h3>{t}</h3><p>{d}</p></article>)}</div></div></section>
       <section className="customerNotice"><div className="shell"><div className="noticePanel"><div className="noticeHeading"><span>!</span><div><h2><em>꼭!</em> 알아두세요.</h2><p>안전한 거래를 위해 신청 전에 확인해 주세요.</p></div></div><ol>{notices.map((text,i)=><li key={text}><span>{String(i+1).padStart(2,'0')}.</span><p>{text}</p></li>)}</ol></div></div></section>
       <section id="faq" className="faqKsdl"><div className="shell"><div className="sectionTitle"><p>이용 전 확인</p><h2>자주 묻는 질문</h2></div><div className="faqListKsdl"><details><summary>회원가입이 필요한가요?</summary><p>별도 회원가입 없이 상품권 교환 신청이 가능합니다.</p></details><details><summary>최소 판매 금액이 있나요?</summary><p>최소 판매금액은 {Number(settings.minimumOrderAmount||10000).toLocaleString()}원 이상입니다.</p></details><details><summary>접수한 주문은 어디에서 확인하나요?</summary><p>접수 시 입력한 전화번호와 조회 비밀번호로 확인할 수 있습니다.</p></details></div></div></section>
