@@ -1,4 +1,5 @@
 import ExchangeForm from './components/ExchangeForm';
+import LookupForm from './components/LookupForm';
 import {getActiveBanks,getActiveProducts,getServiceSettings} from '../lib/db';
 
 const steps=[
@@ -23,7 +24,7 @@ export default async function Home(){
 
     <section id="guide" className="section guideSection"><div className="shell"><div className="sectionHead"><div><span>이용방법</span><h2>4단계로 끝나는 상품권 교환</h2></div></div><div className="stepGrid">{steps.map(([n,t,d])=><article key={n}><span>{n}</span><h3>{t}</h3><p>{d}</p></article>)}</div></div></section>
 
-    <section id="status" className="section statusSection"><div className="shell statusBox"><div><span>거래조회</span><h2>접수 후 진행상태도 간단하게</h2><p>전화번호와 조회 비밀번호를 기준으로 주문 상태를 확인하는 기능을 다음 단계에서 연결합니다.</p></div><a href="#apply">교환 신청하기</a></div></section>
+    <section id="status" className="section lookupSection"><div className="shell lookupGrid"><div className="lookupCopy"><span>거래조회</span><h2>접수 후 진행상태도<br/>바로 확인하세요.</h2><p>접수번호를 기억하지 않아도 됩니다. 신청할 때 입력한 휴대전화번호와 조회 비밀번호만 있으면 최근 접수내역을 확인할 수 있습니다.</p><ul><li>접수번호 확인</li><li>처리상태 확인</li><li>접수금액·예상입금액 확인</li></ul></div><LookupForm/></div></section>
 
     <section id="faq" className="section faqSection"><div className="shell"><div className="sectionHead"><div><span>고객안내</span><h2>자주 확인하는 내용</h2></div></div><div className="faqGrid"><article><h3>회원가입이 필요한가요?</h3><p>회원가입 없이 상품권 교환 신청이 가능합니다.</p></article><article><h3>매입률은 어디에서 확인하나요?</h3><p>메인 매입률 영역에서 현재 접수 기준 매입률을 확인할 수 있습니다.</p></article><article><h3>이체수수료는 상품권마다 붙나요?</h3><p>아니요. 여러 장을 한 번에 접수해도 접수 건당 이체수수료 1회만 반영됩니다.</p></article></div></div></section>
 
