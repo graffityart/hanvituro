@@ -1,0 +1,9 @@
+import {NextResponse} from 'next/server';
+import {isAdmin} from '../../../../lib/admin-auth';
+import {getDb} from '../../../../lib/db';
+
+async function guard(){return await isAdmin()}
+export async function GET(){if(!(await guard()))return NextResponse.json({message:'Unauthorized'},{status:401});const sql=getDb();const rows=await sql`SELECT * FROM notices ORDER BY is_pinned DESC,created_at DESC,id DESC`;return NextResponse.json({items:rows})}
+export async function POST(request){if(!(await guard()))return NextResponse.json({message:'Unauthorized'},{status:401});const body=await request.json();const title=String(body.title||'').trim(),content=String(body.content||'').trim();if(!title)return NextResponse.json({message:'제목을 입력해 주세요.'},{status:400});const sql=getDb();const rows=await sql`INSERT INTO notices(title,content,is_published,is_pinned) VALUES(${title},${content},${Boolean(body.isPublished)},${Boolean(body.isPinned)}) RETURNING *`;return NextResponse.json({ok:true,item:rows[0]})}
+export async function PUT(request){if(!(await guard()))return NextResponse.json({message:'Unauthorized'},{status:401});const body=await request.json();const id=Number(body.id),title=String(body.title||'').trim(),content=String(body.content||'').trim();if(!id||!title)return NextResponse.json({message:'공지사항 정보를 확인해 주세요.'},{status:400});const sql=getDb();const rows=await sql`UPDATE notices SET title=${title},content=${content},is_published=${Boolean(body.isPublished)},is_pinned=${Boolean(body.isPinned)},updated_at=NOW() WHERE id=${id} RETURNING *`;return NextResponse.json({ok:true,item:rows[0]})}
+export async function DELETE(request){if(!(await guard()))return NextResponse.json({message:'Unauthorized'},{status:401});const {id}=await request.json();const sql=getDb();await sql`DELETE FROM notices WHERE id=${Number(id)}`;return NextResponse.json({ok:true})}
