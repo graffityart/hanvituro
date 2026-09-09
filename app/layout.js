@@ -10,6 +10,7 @@ export const metadata = {
   robots: { index: false, follow: false },
 };
 
+// Deployment refresh: 2026-09-09
 export default function RootLayout({ children }) {
   return <html lang="ko"><body>{children}</body></html>;
 }
