@@ -3,6 +3,7 @@ import './exchange-form.css';
 import './easy-extract.css';
 import './lookup.css';
 import './brand-guide.css';
+import './footer-business.css';
 
 export const metadata = {
   title: '한빛 상품권',
