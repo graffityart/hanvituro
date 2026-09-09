@@ -14,15 +14,18 @@ export default function AdminShell({children}){
   const pathname=usePathname();
   if(pathname==='/admin/login') return children;
   return (
-    <div className="adminShell">
-      <aside className="adminSidebar">
-        <Link href="/admin/orders" className="adminBrand">한빛 상품권 <span>ADMIN</span></Link>
-        <nav className="adminNav">
+    <div className="adminPage">
+      <header className="adminTop">
+        <b>한빛 상품권 ADMIN</b>
+        <a href="/" target="_blank" rel="noreferrer">사이트 보기 ↗</a>
+      </header>
+      <div className="adminWrap">
+        <aside className="adminSide">
+          <h3>관리자 메뉴</h3>
           {items.map(item=><Link key={item.href} href={item.href} className={pathname.startsWith(item.href)?'active':''}>{item.label}</Link>)}
-        </nav>
-        <a className="adminSiteLink" href="/" target="_blank" rel="noreferrer">사이트 보기 ↗</a>
-      </aside>
-      <div className="adminMain">{children}</div>
+        </aside>
+        <div className="adminMain">{children}</div>
+      </div>
     </div>
   );
 }
