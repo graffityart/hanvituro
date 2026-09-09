@@ -14,6 +14,10 @@ export const metadata = {
   title: siteTitle,
   description: siteDescription,
   keywords: ['한빛 상품권','문화상품권 현금화','컬쳐랜드 상품권 매입','컬쳐랜드 현금화','상품권 매입','상품권 현금교환','문화상품권 매입'],
+  icons: {
+    icon: [{ url: '/images/favicon.ico', type: 'image/x-icon' }],
+    shortcut: '/images/favicon.ico',
+  },
   alternates: { canonical: '/' },
   openGraph: {
     type: 'website',
