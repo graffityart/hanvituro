@@ -2,11 +2,96 @@
 import {useEffect,useState} from 'react';
 
 const empty={id:null,title:'',content:'',isPublished:true,isPinned:false};
+
 export default function AdminNotices(){
- const [items,setItems]=useState([]),[form,setForm]=useState(empty),[msg,setMsg]=useState('');
- async function load(){const r=await fetch('/api/admin/notices',{cache:'no-store'});if(r.status===401){location.href='/admin/login';return}const d=await r.json();setItems(d.items||[])}
- useEffect(()=>{load()},[]);
- async function save(e){e.preventDefault();setMsg('');const method=form.id?'PUT':'POST';const r=await fetch('/api/admin/notices',{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(form)});const d=await r.json();if(!r.ok){setMsg(d.message||'저장 실패');return}setForm(empty);setMsg('저장되었습니다.');load()}
- async function remove(id){if(!confirm('이 공지사항을 삭제할까요?'))return;await fetch('/api/admin/notices',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});setForm(empty);load()}
- return <main style={{minHeight:'100vh',background:'#f5f7f9',padding:'30px 20px'}}><div style={{maxWidth:1100,margin:'0 auto'}}><div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}><div><small style={{color:'#168fe5',fontWeight:800}}>BOARD MANAGEMENT</small><h1 style={{margin:'6px 0'}}>공지사항 관리</h1></div><a href="/" target="_blank">사이트 보기</a></div><div style={{display:'grid',gridTemplateColumns:'380px 1fr',gap:18}}><form onSubmit={save} style={{background:'#fff',padding:20,borderRadius:16}}><h3>{form.id?'공지 수정':'공지 등록'}</h3><input value={form.title} onChange={e=>setForm({...form,title:e.target.value})} placeholder="제목" style={{width:'100%',height:44,padding:'0 12px',marginBottom:10}}/><textarea value={form.content} onChange={e=>setForm({...form,content:e.target.value})} placeholder="내용" rows={10} style={{width:'100%',padding:12}}/><label style={{display:'block',marginTop:10}}><input type="checkbox" checked={form.isPublished} onChange={e=>setForm({...form,isPublished:e.target.checked})}/> 공개</label><label style={{display:'block',marginTop:6}}><input type="checkbox" checked={form.isPinned} onChange={e=>setForm({...form,isPinned:e.target.checked})}/> 상단 고정</label>{msg&&<p style={{fontSize:12}}>{msg}</p>}<div style={{display:'flex',gap:8,marginTop:14}}><button style={{flex:1,height:44,border:0,borderRadius:8,background:'#168fe5',color:'#fff',fontWeight:800}}>저장</button>{form.id&&<button type="button" onClick={()=>setForm(empty)} style={{height:44}}>취소</button>}</div></form><section style={{background:'#fff',padding:20,borderRadius:16}}><h3>등록된 공지사항</h3>{items.length?items.map(n=><div key={n.id} style={{padding:'14px 0',borderTop:'1px solid #edf0f2',display:'grid',gridTemplateColumns:'1fr auto',gap:12}}><div><strong>{n.is_pinned?'[고정] ':''}{n.title}</strong><p style={{margin:'5px 0 0',color:'#7d8b96',fontSize:12}}>{n.is_published?'공개':'비공개'} · {new Date(n.created_at).toLocaleDateString('ko-KR')}</p></div><div><button onClick={()=>setForm({id:Number(n.id),title:n.title,content:n.content,isPublished:Boolean(n.is_published),isPinned:Boolean(n.is_pinned)})}>수정</button><button onClick={()=>remove(n.id)} style={{marginLeft:6}}>삭제</button></div></div>):<p>등록된 공지사항이 없습니다.</p>}</section></div></div><style jsx>{`@media(max-width:800px){div[style*="grid-template-columns:380px 1fr"]{grid-template-columns:1fr!important}}`}</style></main>
+  const [items,setItems]=useState([]);
+  const [form,setForm]=useState(empty);
+  const [msg,setMsg]=useState('');
+
+  async function load(){
+    const r=await fetch('/api/admin/notices',{cache:'no-store'});
+    if(r.status===401){location.href='/admin/login';return}
+    const d=await r.json();
+    setItems(d.items||[]);
+  }
+
+  useEffect(()=>{load()},[]);
+
+  async function save(e){
+    e.preventDefault();
+    setMsg('');
+    const method=form.id?'PUT':'POST';
+    const r=await fetch('/api/admin/notices',{
+      method,
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(form)
+    });
+    const d=await r.json();
+    if(!r.ok){setMsg(d.message||'저장 실패');return}
+    setForm(empty);
+    setMsg('저장되었습니다.');
+    load();
+  }
+
+  async function remove(id){
+    if(!confirm('이 공지사항을 삭제할까요?'))return;
+    await fetch('/api/admin/notices',{
+      method:'DELETE',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({id})
+    });
+    setForm(empty);
+    load();
+  }
+
+  return <>
+    <div className="adminTitle">
+      <small>BOARD MANAGEMENT</small>
+      <h1>공지사항 관리</h1>
+      <p>메인 화면과 공지사항 페이지에 노출할 안내문을 등록하고 관리합니다.</p>
+    </div>
+
+    <div className="noticeAdminGrid">
+      <form className="noticeAdminCard" onSubmit={save}>
+        <h2>{form.id?'공지 수정':'공지 등록'}</h2>
+        <label className="noticeField">
+          <span>제목</span>
+          <input value={form.title} onChange={e=>setForm({...form,title:e.target.value})} placeholder="공지 제목을 입력하세요" required/>
+        </label>
+        <label className="noticeField">
+          <span>내용</span>
+          <textarea value={form.content} onChange={e=>setForm({...form,content:e.target.value})} placeholder="공지 내용을 입력하세요" rows={10} required/>
+        </label>
+        <div className="noticeChecks">
+          <label><input type="checkbox" checked={form.isPublished} onChange={e=>setForm({...form,isPublished:e.target.checked})}/> 공개</label>
+          <label><input type="checkbox" checked={form.isPinned} onChange={e=>setForm({...form,isPinned:e.target.checked})}/> 상단 고정</label>
+        </div>
+        {msg&&<p className="noticeMessage">{msg}</p>}
+        <div className="noticeActions">
+          <button className="noticePrimary">{form.id?'수정 저장':'저장'}</button>
+          {form.id&&<button type="button" className="noticeSecondary" onClick={()=>setForm(empty)}>취소</button>}
+        </div>
+      </form>
+
+      <section className="noticeAdminCard noticeListCard">
+        <div className="noticeListHead">
+          <div>
+            <h2>등록된 공지사항</h2>
+            <p>최근 등록된 공지의 공개 여부와 고정 상태를 확인할 수 있습니다.</p>
+          </div>
+          <span>{items.length}건</span>
+        </div>
+        {items.length?items.map(n=><article className="noticeAdminRow" key={n.id}>
+          <div>
+            <strong>{n.is_pinned?'[고정] ':''}{n.title}</strong>
+            <p>{n.is_published?'공개':'비공개'} · {new Date(n.created_at).toLocaleDateString('ko-KR')}</p>
+          </div>
+          <div className="noticeRowActions">
+            <button onClick={()=>setForm({id:Number(n.id),title:n.title,content:n.content,isPublished:Boolean(n.is_published),isPinned:Boolean(n.is_pinned)})}>수정</button>
+            <button className="danger" onClick={()=>remove(n.id)}>삭제</button>
+          </div>
+        </article>):<div className="adminEmpty noticeEmpty">등록된 공지사항이 없습니다.</div>}
+      </section>
+    </div>
+  </>;
 }
